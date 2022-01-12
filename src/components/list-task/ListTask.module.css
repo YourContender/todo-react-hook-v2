@@ -1,0 +1,44 @@
+.container {
+    margin-top: 40px;
+    padding-left: 0;
+    text-align: center;
+}
+
+.task {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    color: rgb(88, 88, 88);
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.task:hover {
+    background-color: rgb(138, 154, 241);
+}
+
+.title {
+    font-size: 40px;
+}
+
+.descr {
+    font-size: 20px;
+}
+
+.btn {
+    margin-left: 3px;
+}
+
+.buttons {
+    margin-right: 5px;
+}
+
+.text {
+    margin-left: 5px;
+}
+
+.done {
+    text-decoration: line-through;
+}

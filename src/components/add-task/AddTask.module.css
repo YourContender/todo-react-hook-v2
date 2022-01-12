@@ -1,0 +1,23 @@
+.container {
+    top: 0;
+    z-index: 1;
+}
+
+.alert {
+    position: relative;
+    display: flex;
+    align-items: center;
+    top: -40px;
+    left: 10%;
+    width: 280px;
+    height: 50px;
+    z-index: 777;
+}
+
+.danger {
+    border: solid 1px red;
+}
+
+.alert {
+    margin-bottom: -3rem;
+}
