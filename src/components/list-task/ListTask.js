@@ -3,11 +3,12 @@ import s from './ListTask.module.css';
 import { faCheck, faCheckDouble, faEdit, faSave, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
+import { API_DEL_URL, API_PUT_URL } from "../../config";
 
 function ListTask({state, setState}) {
     const [edit, setEdit] = useState(false);
     const [title, setTitle] = useState('');
-    const [descr, setDescr] = useState('');
+    const [description, setDescr] = useState('');
     const [filter, setFilter] = useState(state);
     
     // filtered method
@@ -18,7 +19,7 @@ function ListTask({state, setState}) {
     const createFilteredTask = (status) => {
         if (status === 'all') {
             setFilter(state);
-        } else if (status === false) {
+        } else if (status === true) {
             let values = [...state].filter(item => item.status);
             setFilter(values);
         } else {
@@ -32,34 +33,61 @@ function ListTask({state, setState}) {
         let filtered = [...state].filter(item => item.id !== id)
 
         setState(filtered);
+
+        fetch(API_DEL_URL + '/' + id, {
+            method: 'DELETE',
+        })
+          .then(res => res.text())
+          .then(res => console.log(res))
     }
 
     // edit method
-    const createEditMethod = () => {
+    const createEditMethod = (id) => {
         let filtered = [...state].map(item => {
             if (item.id === edit) {
                 return {
-                    ...item,
+                    id,
                     title, 
-                    descr,
+                    description,
+                    status: 1
                 }
             }
             return item
         })
-        setState(filtered);
+        setFilter(filtered);
+
+        let data = {
+            id,
+            title, 
+            description,
+            status: 1
+        }
+        console.log(filtered);
+
+        fetch(API_PUT_URL + "/" + id, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+            headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+            }
+        })
+        .then((response) => response.json())
+        .then(data => console.log(data))
+        .catch((err) => console.log(err))
     }
 
-    const saveTask = () => {
+    const saveTask = (title, description, id) => {
         setEdit(true);
-        createEditMethod();
+        createEditMethod(id);
         setTitle('');
         setDescr('');
     }
 
-    const createEditTask = (id, title, descr) => {
+    const createEditTask = (id, title, description) => {
         setEdit(id);
         setTitle(title);
-        setDescr(descr);
+        setDescr(description);
     }
 
     // change status
@@ -68,7 +96,7 @@ function ListTask({state, setState}) {
             if (item.id === id) {
                 return {
                     ...item,
-                    status: !item.status
+                    status: +!item.status
                 }
             }
             return item
@@ -93,25 +121,25 @@ function ListTask({state, setState}) {
                                 edit === item.id ?
                                     <div>
                                         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="test title"/> <br/>
-                                        <input value={descr} onChange={(e) => setDescr(e.target.value)} placeholder="test descr"/>
+                                        <input value={description} onChange={(e) => setDescr(e.target.value)} placeholder="test descr"/>
                                     </div> :
-                                    <div className={!item.status ? s.text : s.done}> 
+                                    <div className={item.status ? s.text : s.done}> 
                                         <h1 className={s.title}>
-                                            {item.title.length > 20 ? item.title.slice(0, 10) + '...' : item.title} 
+                                            {item.title.length > 20 ? item.title.slice(0, 20) + '...' : item.title} 
                                         </h1>
                                         <span className={s.descr}>
-                                            {item.descr.length > 40 ? item.descr.slice(0, 20) + '...' : item.descr}
+                                            {item.description.length > 40 ? item.description.slice(0, 40) + '...' : item.description}
                                         </span>
                                     </div> 
                             }
                             {
                                 edit === item.id ? 
-                                    <Button onClick={saveTask}><FontAwesomeIcon icon={faSave}/></Button> :
+                                    <Button onClick={() => saveTask(item.title, item.description, item.id)}><FontAwesomeIcon icon={faSave}/></Button> :
                                     <div className={s.buttons}>
                                         <Button onClick={() => createMethodRemove(item.id)} className={s.btn} variant="danger"><FontAwesomeIcon icon={faTrash}/></Button>
-                                        <Button onClick={() => createEditTask(item.id, item.title, item.descr)} className={s.btn} variant="secondary"><FontAwesomeIcon icon={faEdit}/></Button>
-                                        <Button onClick={() => createChangeStatus(item.id)} className={s.btn} variant={item.status ? 'warning' : 'success'}>
-                                            {item.status ? <FontAwesomeIcon icon={faCheckDouble}/> : <FontAwesomeIcon icon={faCheck}/>}
+                                        <Button onClick={() => createEditTask(item.id, item.title, item.description)} className={s.btn} variant="secondary"><FontAwesomeIcon icon={faEdit}/></Button>
+                                        <Button onClick={() => createChangeStatus(item.id)} className={s.btn} variant={item.status ? 'success' : 'warning'}>
+                                            {item.status ? <FontAwesomeIcon icon={faCheck}/> : <FontAwesomeIcon icon={faCheckDouble}/>} 
                                         </Button>
                                     </div>
                             }

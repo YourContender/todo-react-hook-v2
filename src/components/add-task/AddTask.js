@@ -1,21 +1,40 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Alert, Button, Form } from "react-bootstrap";
 import { v4 as uuidv4 } from 'uuid';
+import { API_POST_URL } from "../../config";
 import s from './AddTask.module.css';
 
 function AddTask({state, setState}) {
     const [title, setTitle] = useState('');
-    const [descr, setDescr] = useState('');
+    const [description, setDescr] = useState('');
     const [test, setTest] = useState(false);
 
-    const createHandleInput = () => {
+    // console.log('add task: ', state);
+    const createMethodAddNewTask = (title, descr) => {
         if (title && descr) {
-            setState([...state, {
+            let data = {
                 title, 
-                descr,
+                description: descr,
                 id: uuidv4(),
-                status: false
-            }]);
+                status: 1
+            }
+            
+            setState([...state, data]);
+
+            console.log(data);
+            fetch(API_POST_URL, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+                }
+            })
+            .then((response) => response.json())
+            .then(data => console.log(data))
+            .catch((err) => console.log(err))
+
+
             setTitle('');
             setDescr('');
         } else {
@@ -32,23 +51,23 @@ function AddTask({state, setState}) {
                 </Form.Group>
                 <Form.Group className="mb-2" controlId="exampleForm.ControlTextarea1">
                     <Form.Label>Enter description</Form.Label>
-                    <Form.Control onClick={() => setTest(false)} name='descr' onChange={(e) => setDescr(e.target.value)} value={descr} as="textarea" rows={2} placeholder="введите описание"/>
+                    <Form.Control onClick={() => setTest(false)} name='descr' onChange={(e) => setDescr(e.target.value)} value={description} as="textarea" rows={2} placeholder="введите описание"/>
                 </Form.Group>
             </Form>
 
-            <Button onClick={createHandleInput} variant="primary">Добавить</Button>
+            <Button onClick={() => createMethodAddNewTask(title, description)} variant="primary">Добавить</Button>
 
             {
                 test ? 
-                    title === '' && descr === '' ? 
+                    title === '' && description === '' ? 
                         <Alert onClick={() => setTest(false)} className={s.alert} variant='danger' style={{'marginBottom': '-3rem'}}>
                             Пустую задачу нельзя добавить!
                         </Alert>    
-                    : title === '' && descr ?
+                    : title === '' && description ?
                         <Alert onClick={() => setTest(false)} className={s.alert} variant='danger' style={{'marginBottom': '-3rem'}}>
                             Введите заголовок!
                         </Alert>  
-                    : title && descr === ''?
+                    : title && description === ''?
                         <Alert onClick={() => setTest(false)} className={s.alert} variant='danger' style={{'marginBottom': '-3rem'}}>
                             Введите описание!
                         </Alert>    : null 
